@@ -7,6 +7,7 @@ const boxen = require ("boxen");
 
 //Connect to my database const mysql = require('mysql2');
 const db = require('./db/connection');
+const { text } = require('figlet');
 
 const app = express();
 
@@ -22,15 +23,21 @@ const promptUser = () => {
             type: 'list',
             name: 'choice',
             message: 'What whould you like to do?',
-            choices: ['View all Roles','View all Employees', 
+            choices: ['View all Departments','View all Roles','View all Employees', 
                         'Add a Department','Add a Role','Add an Employee',
                         'Update an Employee Role','Exit']
         }
     ]).then(val => {
         switch (val.choice) {
-            case "View all Roles":
-                viewAllRoles()
+            case "View all Departments":
+                viewAllDepartments();
                 break;
+            case "View all Roles":
+                viewAllRoles();
+                break;
+            case "View all Employees":
+                viewAllEmployees();
+                break;             
             case "Exit":
                 db.end();
                 break;
@@ -38,13 +45,46 @@ const promptUser = () => {
     })
 };
 
-function viewAllRoles() {
-    db.query("SELECT * FROM employees", (err, rows) => {
-    if (err) throw err;
+
+const viewAllDepartments = () => {
+    db.query(`SELECT name AS department_name, id AS departament_id 
+    FROM departments`, (err, rows) => {
+    if (err){
+        console.log(err)
+    }
+    console.log(chalk.hex('#4682B4').bold(`→ Total Departments:`));
     console.table(rows);
-    
-    })
+    promptUser();
+    });
 };
+
+const viewAllRoles = () => {
+    db.query("SELECT * FROM employees", (err, rows) => {
+    if (err){
+        console.log(err)
+    }
+    console.log(chalk.hex('#4682B4').bold(`→ Total Employees:`));
+    console.table(rows);
+    promptUser();
+    });
+};
+
+const viewAllEmployees = () => {
+    var sql = `SELECT employees.id, employees.first_name, employees.last_name,
+                roles.title, departments.name AS 'department', 
+                roles.salary, employees.manager_id FROM employees
+                LEFT JOIN roles ON employees.role_id = roles.id
+                LEFT JOIN departments ON roles.department_id = departments.id`;
+    db.query(sql, (err, rows) => {
+      if (err){
+        console.log(err)
+      }
+      console.log(chalk.hex('#4682B4').bold(`→ Current Employees:`));
+      console.table(rows);
+      promptUser();
+    });
+};
+
 
 // Start server after DB connection
 db.connect(err => {

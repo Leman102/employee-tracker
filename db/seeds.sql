@@ -1,6 +1,6 @@
 -- Department seeds--
 INSERT INTO departments (name)
-VALUE ("Sales");
+VALUE ("Engineering"), ("Finance"),("Legal"),("Sales");
 
 -- Role seeds--
 INSERT INTO roles (title, salary, department_id)
