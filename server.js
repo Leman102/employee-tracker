@@ -18,6 +18,7 @@ app.use(express.json());
 var depNamesArray = ['Add a new Department?'];
 var roleNamesArray = ['Add a new Role?'];
 
+
 //add Function Ptompt User
 const promptUser = () => {
     return inquirer.prompt([
@@ -48,6 +49,9 @@ const promptUser = () => {
                 break;
             case "Add Employee":
                 addNewEmployee();
+                break;             
+            case "Update an Employee Role":
+                updateEmployee();
                 break;             
             case "Exit":
                 db.end();
@@ -145,8 +149,7 @@ const addNewRole = () => {
             name: 'departmentName',
             type: 'list',
             message: 'Which department is this new role in?',
-            choices: depNamesArray,
-            validate: ""
+            choices: depNamesArray
         }
     ]).then((response) => {
         if(response.departmentName == "Add a new Department?"){
@@ -184,7 +187,7 @@ const depList = ()=> {
         return depNamesArray  
     })
 };
-//create list of departments
+//create list of roles
 const roleList = ()=> {
     const sql = `SELECT * FROM roles`;
     db.query(sql, (err, resp) => {
@@ -245,8 +248,67 @@ const addNewEmployee = () => {
     });
 };
 
+var namesArray = ["Create a new Employee?"];
+//create list of Employees
+const empList = ()=> {
+    const sql = `SELECT * FROM employees`;
+    db.query(sql, (err, resp) => {
+        if (err) {console.log(err)}
+        resp.forEach((employees) => {
+            namesArray.push(employees.id + "." + employees.first_name+" "+employees.last_name)     
+        });
+        //console.log(namesArray)
+        return namesArray  
+    })
+};
 
-//
+//Update employee
+const updateEmployee = () => {
+    roleList();
+    
+    inquirer.prompt([
+        {
+            name: 'chosenEmployee',
+            type: 'list',
+            message: 'Which employee has a new role?',
+            //choices: ["1","2","3","4","5","6","7","8","9","10","11","12","13","142","15","16","17","18","19","20","21","22"]
+            choices: namesArray
+        },
+        {
+            name: 'newRole',
+            type: 'list',
+            message: 'What is the new role?',
+            choices: roleNamesArray
+            //choices: roleNamesArray
+        }
+    ]).then((response) => {
+        if(response.chosenEmployee == "Create a new Employee?"){
+            return addNewEmployee();
+        }else if(response.newRole == "Add a new Role?"){
+            return addNewRole();
+        }
+        if(response.chosenEmployee == '' || response.newRole == ''){
+            console.log(chalk.red(boxen("Please select a valid employee Name and Role!")));
+            return updateEmployee();
+        }
+        let roleID = response.newRole.split(".");
+        let roleidnum = roleID[0];
+        let employeeID = response.chosenEmployee.split(".");
+        let employeeidnum = employeeID[0];
+        const sql = `UPDATE employees SET employees.role_id = ? WHERE employees.id = ?`;
+        const params = [roleidnum, employeeidnum];
+        db.query(sql,params, (err,row) => {
+            if (err){
+                console.log(err)
+                return promptUser();
+            }
+            console.log(chalk.hex('#4682B4').bold(boxen(chalk.bold(response.chosenEmployee + ` role has been updated!`))));
+            viewAllEmployees();
+        })
+    });
+};
+
+
 // Start server after DB connection
 db.connect(err => {
     if (err) throw err;
@@ -255,5 +317,6 @@ db.connect(err => {
     Employee Tracker`)+chalk.white(`
                                                                     Created by @Leman102`)), 
     {borderStyle: 'double',titleAlignment: 'center'})));
+    empList();
     promptUser();
 });
