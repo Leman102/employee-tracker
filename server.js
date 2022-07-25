@@ -24,7 +24,7 @@ const promptUser = () => {
             name: 'choice',
             message: 'What whould you like to do?',
             choices: ['View all Departments','View all Roles','View all Employees', 
-                        'Add a Department','Add a Role','Add an Employee',
+                        'Add Department','Add Role','Add Employee',
                         'Update an Employee Role','Exit']
         }
     ]).then(val => {
@@ -37,6 +37,9 @@ const promptUser = () => {
                 break;
             case "View all Employees":
                 viewAllEmployees();
+                break;             
+            case "Add Department":
+                addDepartment();
                 break;             
             case "Exit":
                 db.end();
@@ -78,12 +81,31 @@ const viewAllEmployees = () => {
                 LEFT JOIN roles ON employees.role_id = roles.id
                 LEFT JOIN departments ON roles.department_id = departments.id`;
     db.query(sql, (err, rows) => {
-      if (err){
-        console.log(err)
-      }
-      console.log(chalk.hex('#4682B4').bold(`→ Current Employees:`));
-      console.table(rows);
-      promptUser();
+        if (err){
+            console.log(err)
+         }
+        console.log(chalk.hex('#4682B4').bold(`→ Current Employees:`));
+        console.table(rows);
+        promptUser();
+    });
+};
+
+const addDepartment = () => {
+    inquirer.prompt([
+        {
+            name: 'newDepartment',
+            type: 'input',
+            message: 'What Department would you like to add?'
+        }
+    ]).then((response) => {
+        const sql = `INSERT INTO departments (name) VALUES (?)`;
+        db.query(sql,response.newDepartment, (err, row) => {
+            if (err){
+                console.log(err)
+            }
+            console.log(chalk.hex('#4682B4').bold(boxen(chalk.bold(response.newDepartment + ` department successfully created!`))));
+            promptUser();
+        });
     });
 };
 
