@@ -59,11 +59,13 @@ const viewAllDepartments = () => {
 };
 
 const viewAllRoles = () => {
-    db.query("SELECT * FROM employees", (err, rows) => {
+    db.query(`SELECT roles.title, roles.id, departments.name AS department, 
+    roles.salary FROM roles
+    LEFT JOIN departments ON roles.department_id = departments.id`, (err, rows) => {
     if (err){
         console.log(err)
     }
-    console.log(chalk.hex('#4682B4').bold(`→ Total Employees:`));
+    console.log(chalk.hex('#4682B4').bold(`→ Total Roles:`));
     console.table(rows);
     promptUser();
     });
@@ -71,7 +73,7 @@ const viewAllRoles = () => {
 
 const viewAllEmployees = () => {
     var sql = `SELECT employees.id, employees.first_name, employees.last_name,
-                roles.title, departments.name AS 'department', 
+                roles.title, departments.name AS department, 
                 roles.salary, employees.manager_id FROM employees
                 LEFT JOIN roles ON employees.role_id = roles.id
                 LEFT JOIN departments ON roles.department_id = departments.id`;
