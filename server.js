@@ -4,6 +4,7 @@ const inquirer = require("inquirer");
 const chalk = require ("chalk");
 const figlet = require("figlet");
 const boxen = require ("boxen");
+const consoleTable = require('console.table');
 
 //Connect to my database const mysql = require('mysql2');
 const db = require('./db/connection');
