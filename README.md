@@ -28,11 +28,13 @@ This project is an application called Employee-tracker that can be used to check
   > npm i chalk@4.0.0
   
   > npm i boxen@4.0.0
+
+  > npm i console.table
 ## Usage
 - Once all the packages have been installed, open terminal and run the following code in command line :
   > npm start
 ## Walkthrough
-https://user-images.githubusercontent.com/64149102/180913524-9b211825-846d-4b11-b997-cd9e8a24d436.mp4
+https://user-images.githubusercontent.com/64149102/181049080-66532229-97a6-4eed-a432-5be5f3a94a35.mp4
 ## Contributing
 Contributions are more than welcome because we can learn, inspire, and create. Any contributions you make are greatly appreciated. Please reach out to me before making any changes. Thank you! 😊
 ## Technologies
