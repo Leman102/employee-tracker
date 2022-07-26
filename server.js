@@ -19,16 +19,14 @@ var depNamesArray = ['Add a new Department?'];
 var roleNamesArray = ['Add a new Role?'];
 
 
-//add Function Ptompt User
+// //add Function Ptompt User
 const promptUser = () => {
     return inquirer.prompt([
         {
             type: 'list',
             name: 'choice',
             message: 'What whould you like to do?',
-            choices: ['View all Departments','View all Roles','View all Employees', 
-                        'Add Department','Add Role','Add Employee',
-                        'Update an Employee Role','Exit']
+            choices: ['View all Departments','View all Roles','View all Employees','View department budget','Add Department','Add Role','Add Employee','Update an Employee Role','Update manager','Exit']
         }
     ]).then(val => {
         switch (val.choice) {
@@ -52,6 +50,12 @@ const promptUser = () => {
                 break;             
             case "Update an Employee Role":
                 updateEmployee();
+                break;             
+            case "Update manager":
+                updateManager();
+                break;             
+            case "View department budget":
+                viewDepartmentBudget();
                 break;             
             case "Exit":
                 db.end();
@@ -308,6 +312,62 @@ const updateEmployee = () => {
     });
 };
 
+//Update employee
+const updateManager = () => {    
+    inquirer.prompt([
+        {
+            name: 'chosenEmployee',
+            type: 'list',
+            message: 'Which employee has a new Manager?',
+            choices: namesArray
+        },
+        {
+            name: 'newManager',
+            type: 'list',
+            message: 'Who is the new Manager?',
+            choices: namesArray
+        }
+    ]).then((response) => {
+        if(response.chosenEmployee == "Create a new Employee?" || response.newManager == "Create a new Employee?" ){
+            return addNewEmployee();
+        }
+        if(response.chosenEmployee == '' || response.newManager == ''){
+            console.log(chalk.red(boxen("Please select a valid employee Name and Role!")));
+            return updateManager();
+        }
+        let managerID = response.newManager.split(".");
+        let manageridnum = managerID[0];
+        let employeeID = response.chosenEmployee.split(".");
+        let employeeidnum = employeeID[0];
+        const sql = `UPDATE employees SET employees.manager_id = ? WHERE employees.id = ?`;
+        const params = [manageridnum, employeeidnum];
+        db.query(sql,params, (err,row) => {
+            if (err){
+                console.log(err)
+                return promptUser();
+            }
+            console.log(chalk.hex('#4682B4').bold(boxen(chalk.bold(response.chosenEmployee + ` manager has been updated!`))));
+            viewAllEmployees();
+        })
+    });
+};
+
+//VIew Budget per department
+const viewDepartmentBudget = () => {
+   const sql =     `SELECT department_id AS id, 
+                    departments.name AS department,
+                    SUM(salary) AS budget
+                    FROM  roles  
+                    INNER JOIN departments ON roles.department_id = departments.id GROUP BY  roles.department_id`;
+    db.query(sql, (error, row) => {
+        if (error){
+            console.log(err);
+        } 
+        console.log(chalk.hex('#4682B4').bold(`→ Total Departments:`));
+        console.table(row);
+        promptUser();
+    });
+  };
 
 // Start server after DB connection
 db.connect(err => {

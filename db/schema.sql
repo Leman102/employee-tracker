@@ -27,3 +27,5 @@ CREATE TABLE employees (
     role_id INT NOT NULL,
     FOREIGN KEY (role_id) REFERENCES roles(id)
 );
+
+select * from employees where id in ("2","1")
